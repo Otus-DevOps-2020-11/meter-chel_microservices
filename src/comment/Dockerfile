@@ -1,6 +1,6 @@
 FROM ruby:2.2
 
-ENV COMMENT_DATABASE_HOST=comment_db COMMENT_DATABASE=comments APP_HOME=/app
+ENV COMMENT_DATABASE_HOST=comment_db1 COMMENT_DATABASE=comments APP_HOME=/app
 
 RUN apt-get update -qq && apt-get install -y build-essential
 
