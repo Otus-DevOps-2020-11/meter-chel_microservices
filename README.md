@@ -132,3 +132,74 @@ docker-monolith/
 │       └── variables.tf
 ├── mongod.conf
 └── start.sh
+
+
+# Домашняя работа к лекции №17 (docker-3)
+# Docker образы. Микросервисы
+
+## Создать три Dockerfile для новой структуры приложения
+
+ - для сервиса постов
+ - для сервиса коментов
+ - для веб-интерфейса
+
+## Подключаемся к ранее созданному Docker host’у
+`eval $(docker-machine env docker-host)`
+
+## Сборка
+```
+docker build -t xxxxxxxx/post:1.0 ./post-py
+docker build -t xxxxxxxx/comment:1.0 ./comment
+docker build -t xxxxxxxx/ui:1.0 ./ui
+```
+
+## Создать сеть
+`docker network create reddit`
+## и запустить контейнеры
+```
+docker run -d --network=reddit --network-alias=post_db --network-alias=comment_db1 mongo:latest
+docker run -d --network=reddit --network-alias=post xxxxxxxx/post:1.0
+docker run -d --network=reddit --network-alias=comment xxxxxxxx/comment:1.0
+docker run -d --network=reddit -p 9292:9292 xxxxxxxx/ui:1.0
+```
+
+### для удобства перезапуска контейнеров создал скрипт run.sh
+
+## VOLUME
+Создать `docker volume create reddit_db`
+Использование `-v reddit_db:/data/db`
+Пример:
+`docker run -d --network=reddit --network-alias=post_db --network-alias=comment_db -v reddit_db:/data/db mongo:latest`
+Подключение VOLUME дало возможность сохранять данные при отключении или перезапуске контейнера
+
+## Задание со *
+
+### Остановить и запустить приложения с другими алиасами
+
+docker kill $(docker ps -q)
+В командах запуска редактируются ключи `--network-alias= ` переменные (ENV) нужно отредактировать в докерфайлах,
+но можно передать через `--env` при запуске, например:
+`docker run -d --network=reddit -p 9292:9292 --env POST_SERVICE_HOST=значение --env COMMENT_SERVICE_HOST=значение xxxxxxxx/ui:3.0`
+
+
+### сборка образа на Alpine:
+```
+FROM alpine:latest
+
+RUN apk update \
+    && apk add --no-cache ruby-full ruby-dev build-base \
+    && gem install bundler:1.17.2
+```
+потребовалась именно версия bundler:1.17.2, без указания версии сборка прерывалась, видимо особенность образа
+
+Удалось уменьшить размер имиджа ui
+```
+REPOSITORY             TAG            IMAGE ID       CREATED             SIZE
+xxxxxxxx/ui            3.0            9544f8ce6eba   About an hour ago   266MB
+xxxxxxxx/ui            2.0            32b07928ee0d   5 hours ago         458MB
+xxxxxxxx/comment       1.0            911d978e3150   5 hours ago         768MB
+xxxxxxxx/post          1.0            2311934c666d   5 hours ago         119MB
+xxxxxxxx/ui            1.0            25aa8cf1157e   7 hours ago         771MB
+xxxxxxxx/otus-reddit   1.0            9376b953d323   4 days ago          702MB
+```
+...
