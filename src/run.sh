@@ -15,4 +15,4 @@ docker run -d --network=reddit \
 --network-alias=comment ge2rg312qe/comment:1.0
 
 docker run -d --network=reddit \
--p 9292:9292 ge2rg312qe/ui:2.0
+-p 9292:9292 ge2rg312qe/ui:3.0
