@@ -5,7 +5,10 @@ services:
     volumes:
       - reddit_db:/data/db
     networks:
-      - reddit
+      reddit:
+        aliases:
+        - comment_db
+        - post_db
   ui:
     build: ./ui
     image: ${USER}/ui:${TAG_UI}
@@ -15,7 +18,7 @@ services:
       - COMMENT_SERVICE_HOST=comment
       - COMMENT_SERVICE_PORT=9292
     ports:
-      - 9292:9292/tcp
+      - 80:9292/tcp
     networks:
       - reddit
   post:
