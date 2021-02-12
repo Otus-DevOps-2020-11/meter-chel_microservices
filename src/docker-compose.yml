@@ -18,7 +18,7 @@ services:
       - COMMENT_SERVICE_HOST=comment
       - COMMENT_SERVICE_PORT=9292
     ports:
-      - 80:9292/tcp
+      - ${PORT_UI}:9292/tcp
     networks:
       - front_net
   post:
