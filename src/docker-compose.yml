@@ -3,29 +3,29 @@ services:
   post_db:
     image: mongo:3.2
     volumes:
-      - post_db:/data/db
+      - reddit_db:/data/db
     networks:
       - reddit
   ui:
     build: ./ui
-    image: ${USERNAME}/ui:3.0
+    image: ${USER}/ui:${TAG_UI}
     ports:
       - 9292:9292/tcp
     networks:
       - reddit
   post:
     build: ./post-py
-    image: ${USERNAME}/post:1.0
+    image: ${USER}/post:${TAG_POST}
     networks:
       - reddit
   comment:
     build: ./comment
-    image: ${USERNAME}/comment:1.0
+    image: ${USER}/comment:${TAG_COMMENT}
     networks:
       - reddit
 
 volumes:
-  post_db:
+  reddit_db:
 
 networks:
   reddit:
