@@ -9,6 +9,11 @@ services:
   ui:
     build: ./ui
     image: ${USER}/ui:${TAG_UI}
+    environment:
+      - POST_SERVICE_HOST=post
+      - POST_SERVICE_PORT=5000
+      - COMMENT_SERVICE_HOST=comment
+      - COMMENT_SERVICE_PORT=9292
     ports:
       - 9292:9292/tcp
     networks:
@@ -16,11 +21,18 @@ services:
   post:
     build: ./post-py
     image: ${USER}/post:${TAG_POST}
+    environment:
+      - POST_DATABASE_HOST=post_db
+      - POST_DATABASE=posts
     networks:
       - reddit
   comment:
     build: ./comment
     image: ${USER}/comment:${TAG_COMMENT}
+    environment:
+      - COMMENT_DATABASE_HOST=comment_db
+      - COMMENT_DATABASE=comments
+      - APP_HOME='/app'
     networks:
       - reddit
 
