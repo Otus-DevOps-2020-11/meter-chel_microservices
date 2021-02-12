@@ -5,7 +5,7 @@ services:
     volumes:
       - reddit_db:/data/db
     networks:
-      reddit:
+      back_net:
         aliases:
         - comment_db
         - post_db
@@ -20,7 +20,7 @@ services:
     ports:
       - 80:9292/tcp
     networks:
-      - reddit
+      - front_net
   post:
     build: ./post-py
     image: ${USER}/post:${TAG_POST}
@@ -28,7 +28,8 @@ services:
       - POST_DATABASE_HOST=post_db
       - POST_DATABASE=posts
     networks:
-      - reddit
+      - front_net
+      - back_net
   comment:
     build: ./comment
     image: ${USER}/comment:${TAG_COMMENT}
@@ -37,10 +38,22 @@ services:
       - COMMENT_DATABASE=comments
       - APP_HOME='/app'
     networks:
-      - reddit
+      - front_net
+      - back_net
 
 volumes:
   reddit_db:
 
 networks:
-  reddit:
+  front_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.0/29
+  back_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.8/29
