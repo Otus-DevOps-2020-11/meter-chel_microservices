@@ -36,7 +36,6 @@ services:
     environment:
       - COMMENT_DATABASE_HOST=comment_db
       - COMMENT_DATABASE=comments
-      - APP_HOME='/app'
     networks:
       - front_net
       - back_net

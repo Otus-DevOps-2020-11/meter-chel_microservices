@@ -8,7 +8,6 @@ ENV APP_HOME=/app
 
 RUN apk update \
     && apk add --no-cache ruby-full ruby-dev build-base \
-#    && bundle update --bundler \
     && gem install bundler:1.17.2
 
 RUN mkdir $APP_HOME

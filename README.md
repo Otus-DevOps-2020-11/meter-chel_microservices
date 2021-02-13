@@ -109,7 +109,7 @@ docker push LOGIN/otus-reddit:1.0
 ```
 
 ### Получившаяся стрктура каталогов
-
+```
 docker-monolith/
 ├── db_config
 ├── docker-1.log
@@ -132,7 +132,7 @@ docker-monolith/
 │       └── variables.tf
 ├── mongod.conf
 └── start.sh
-
+```
 
 # Домашняя работа к лекции №17 (docker-3)
 # Docker образы. Микросервисы
@@ -202,4 +202,135 @@ xxxxxxxx/post          1.0            2311934c666d   5 hours ago         119MB
 xxxxxxxx/ui            1.0            25aa8cf1157e   7 hours ago         771MB
 xxxxxxxx/otus-reddit   1.0            9376b953d323   4 days ago          702MB
 ```
-...
+
+
+# Домашняя работа к лекции №18 (docker-4)
+# Сети и Docker-Compose
+
+## Сети
+
+`docker network create <параметры> <имя сети>` - создать сеть
+
+Параметры
+-d драйвер, например `-d bridge`
+--subnet=адрес_сети/маска
+
+Посмотреть список созданных сетей можно командой:
+`docker network ls`
+
+Вывод:
+NETWORK ID — индификатор сети.
+NAME — Имя сети. Можно задать произвольное имя.
+DRIVER — Используемый драйвер для созданной сети.
+SCOPE — Где используется.
+
+`docker network connect <network> <container>` подключает контейнер <container> к сети <network>.
+`docker network disconnect <network> <container>` отключает контейнер <container> от сети <network>.
+`docker network rm <network>` - удалить сеть <network>
+`.yes|docker network prune` удалить все созданные сети которые не используются
+
+### Запуск контейнеров с указанием параметров сети
+
+docker run `-- network=`имя сети `--network-alias=`сетевое имя контейнера
+
+## docker-compose
+
+Команды
+`docker-compose up -d` - запустить (-d в фоновом режиме)
+`docker-compose stop` - Остановить контейнеры
+`docker-compose down` - Остановить и удалить контейнеры
+`docker-compose restart` - Перезапуск
+`docker-compose ps` - Список запущенных контейнеров
+`docker-compose config` - проверка и вывод конфигурации
+`docker-compose up --build` - пересобрать контейнеры
+`docker-compose images` - список имиджей
+
+Задать имя проекта можно с помощью ключа `-p` команды `docker-compose up`
+Пример `docker-compose -p $PROJECT_NAME up`
+
+docker-compose.yaml в этом файле настраиваются контейнеры, которые потом они будут созданы автоматически с помощью docker-compose.
+Файл использует синтаксис YAML и должен содержать такие данные:
+```
+version: 'версия'
+networks:
+  сети
+volumes:
+  хранилища
+services:
+  контейнеры
+```
+
+в файле можно использовать переменные, значения которым можно можно присваивать в файле `.env`
+
+Пример файла `.env`
+```
+USER=---------
+TAG_UI=3.0
+TAG_POST=1.0
+TAG_COMMENT=1.0
+PORT_UI=80
+```
+
+Пример файла `docker-compose.yaml`
+```
+version: '3.3'
+services:
+  post_db:
+    image: mongo:3.2
+    volumes:
+      - reddit_db:/data/db
+    networks:
+      back_net:
+        aliases:
+        - comment_db
+        - post_db
+  ui:
+    build: ./ui
+    image: ${USER}/ui:${TAG_UI}
+    environment:
+      - POST_SERVICE_HOST=post
+      - POST_SERVICE_PORT=5000
+      - COMMENT_SERVICE_HOST=comment
+      - COMMENT_SERVICE_PORT=9292
+    ports:
+      - ${PORT_UI}:9292/tcp
+    networks:
+      - front_net
+  post:
+    build: ./post-py
+    image: ${USER}/post:${TAG_POST}
+    environment:
+      - POST_DATABASE_HOST=post_db
+      - POST_DATABASE=posts
+    networks:
+      - front_net
+      - back_net
+  comment:
+    build: ./comment
+    image: ${USER}/comment:${TAG_COMMENT}
+    environment:
+      - COMMENT_DATABASE_HOST=comment_db
+      - COMMENT_DATABASE=comments
+      - APP_HOME='/app'
+    networks:
+      - front_net
+      - back_net
+
+volumes:
+  reddit_db:
+
+networks:
+  front_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.0/29
+  back_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.8/29
+```
+.
