@@ -19,7 +19,7 @@ resource "yandex_compute_instance" "gitlab" {
   resources {
     cores  = 2
     memory = 4
-    core_fraction = 100
+    core_fraction = 50
   }
 
   boot_disk {

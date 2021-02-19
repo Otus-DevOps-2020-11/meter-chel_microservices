@@ -1,0 +1,4 @@
+[docker]
+%{ for index, addr in extip ~}
+${name[index]} ansible_host=${extip[index]}
+%{ endfor ~}
