@@ -64,7 +64,6 @@ resource "local_file" "generate_inventory" {
 #   }
 
    provisioner "local-exec" {
-#     command = "ansible-playbook --inventory ${self.network_interface.0.nat_ip_address}, install_docker.yml"
 #     command = "ansible-playbook --inventory yandex_compute_instance.gitlab.*.network_interface.0.nat_ip_address, site.yml"
 #     command = "ansible-playbook site.yml"
      command = "ansible-playbook run_gitlab.yml"
