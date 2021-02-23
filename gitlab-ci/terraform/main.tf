@@ -3,7 +3,7 @@ provider "yandex" {
   cloud_id                 = var.cloud_id
   folder_id                = var.folder_id
   zone                     = var.zone
-  version = "~> 0.35.0"
+#  version = "~> 0.35.0"
 }
 
 data "yandex_compute_image" "my_image" {
@@ -26,7 +26,7 @@ resource "yandex_compute_instance" "gitlab" {
     initialize_params {
     # Указать id образа с Docker
     #  image_id = var.image_id
-      image_id = "${data.yandex_compute_image.my_image.id}"
+      image_id = data.yandex_compute_image.my_image.id
       size = 50
     }
 
@@ -48,14 +48,31 @@ resource "yandex_compute_instance" "gitlab" {
     agent = false
     private_key = file(var.private_key_path)
   }
+}
+
+
+resource "local_file" "generate_inventory" {
+  content = templatefile("inventory.tmpl", {
+    name = yandex_compute_instance.gitlab.*.name,
+    extip = yandex_compute_instance.gitlab.*.network_interface.0.nat_ip_address,
+    }
+  )
+  filename = "../ansible/inventory.ini"
 
    provisioner "local-exec" {
-     command = "sleep 30"
+     command = "sleep 60"
    }
 
    provisioner "local-exec" {
-     command = "ansible-playbook --inventory ${self.network_interface.0.nat_ip_address}, install_docker.yml"
+#     command = "ansible-playbook --inventory ${self.network_interface.0.nat_ip_address}, install_docker.yml"
+#     command = "ansible-playbook --inventory yandex_compute_instance.gitlab.*.network_interface.0.nat_ip_address, site.yml"
+     command = "ansible-playbook site.yml"
      working_dir = "../ansible"
    }
+
+#   provisioner "local-exec" {
+#     command = "ansible-playbook docker-compose.yml"
+#     working_dir = "../ansible"
+#   }
 
 }

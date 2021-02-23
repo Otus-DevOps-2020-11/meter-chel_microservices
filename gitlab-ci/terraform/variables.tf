@@ -12,6 +12,7 @@ variable zone {
 variable public_key_path {
   # Описание переменной
   description = "Path to the public key used for ssh access"
+  default = "~/.ssh/id_rsa.pub"
 }
 #variable image_id {
 #  description = "Disk image"
@@ -24,6 +25,7 @@ variable service_account_key_file {
 }
 variable private_key_path {
   description = "Private key path for ssh"
+  default = "~/.ssh/id_rsa"
 }
 variable count_app {
   description = "app counter"
