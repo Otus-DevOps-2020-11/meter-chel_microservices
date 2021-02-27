@@ -28,7 +28,7 @@ test_unit_job:
 test_integration_job:
   stage: test
   script:
-    - echo 'Testing'
+    - echo 'Testing '
 
 deploy_dev_job:
   stage: review
