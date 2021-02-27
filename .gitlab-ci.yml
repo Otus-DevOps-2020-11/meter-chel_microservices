@@ -40,7 +40,7 @@ deploy_dev_job:
 
 staging:
   stage: stage
-  when: manual
+#  when: manual
   only:
     - /^\d+\.\d+\.\d+/
   script:
@@ -51,7 +51,7 @@ staging:
 
 production:
   stage: production
-  when: manual
+#  when: manual
   only:
     - /^\d+\.\d+\.\d+/
   script:
