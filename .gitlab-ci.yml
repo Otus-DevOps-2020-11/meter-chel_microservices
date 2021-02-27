@@ -51,9 +51,9 @@ branch review:
 
 staging:
   stage: stage
-#  when: manual
-#  only:
-#    - /^\d+\.\d+\.\d+/
+  when: manual
+  only:
+    - /^\d+\.\d+\.\d+/
   script:
     - echo "Deploy"
   environment:
@@ -62,9 +62,9 @@ staging:
 
 production:
   stage: production
-#  when: manual
-#  only:
-#    - /^\d+\.\d+\.\d+/
+  when: manual
+  only:
+    - /^\d+\.\d+\.\d+/
   script:
     - echo "Deploy"
   environment:
