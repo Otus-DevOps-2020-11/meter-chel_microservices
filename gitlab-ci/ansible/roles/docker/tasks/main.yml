@@ -1,0 +1,60 @@
+---
+
+- name: install transport-https and certs-pkgs
+  become: true
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+      - python-pip
+      - python3-pip
+    update_cache: yes
+    state: present
+
+- name: add key
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add repository
+  become: true
+  apt_repository:
+    repo: deb [ arch=amd64,arm64 ] https://download.docker.com/linux/ubuntu bionic stable
+    update_cache: yes
+    state: present
+
+- name: install Docker
+  become: true
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    update_cache: yes
+    state: present
+
+- name: Install Docker Module for Python
+  become: true
+  pip:
+    name:
+#    name: docker-py
+    - docker
+    executable: pip
+
+- name: Install Docker Module for Python v3
+  become: true
+  pip:
+    name:
+    - docker
+    executable: pip3
+
+- name: Enable service
+  become: true
+  service:
+    name: docker
+    state: started
+    enabled: yes

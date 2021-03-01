@@ -1,0 +1,12 @@
+---
+- name: GitLab
+  hosts: all
+  gather_facts: no
+  pre_tasks:
+    - name: Wait server
+      wait_for_connection:
+    - name: Gather facts for first time
+      setup:
+  roles:
+    - docker
+    - gitlab
