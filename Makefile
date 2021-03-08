@@ -39,12 +39,16 @@ docker-login::
 docker-logout::
 	docker logout
 
-up:: build docker-compose-up docker-compose-ps
+up:: build docker-compose-up-srv docker-compose-up-mon docker-compose-ps
 
 # Create containers
-docker-compose-up::
+docker-compose-up-srv::
 	cd docker && \
 	docker-compose up -d
+
+docker-compose-up-mon::
+	cd docker && \
+	docker-compose -f docker-compose-monitoring.yml up -d
 
 # Show containers
 docker-compose-ps::
