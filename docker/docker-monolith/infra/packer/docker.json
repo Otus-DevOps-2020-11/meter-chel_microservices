@@ -1,0 +1,27 @@
+{
+    "builders": [
+        {
+            "type": "yandex",
+            "service_account_key_file": "{{ user `service_account_key_file` }}",
+            "folder_id": "{{ user `folder_id`}}",
+            "source_image_family": "{{ user `source_image_family`}}",
+            "image_name": "app-docker-{{timestamp}}",
+            "image_family": "docker",
+            "ssh_username": "ubuntu",
+            "use_ipv4_nat": "true",
+            "platform_id": "standard-v1",
+            "disk_name": "{{ user `disk_name` }}",
+            "disk_type": "{{ user `disk_type` }}",
+            "disk_size_gb": 15 ,
+            "instance_mem_gb": 2 ,
+            "metadata": {"serial-port-enable": "1"}
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "user": "ubuntu",
+            "playbook_file": "../ansible/install_docker.yml"
+        }
+    ]
+}

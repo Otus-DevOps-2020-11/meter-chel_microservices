@@ -1,0 +1,17 @@
+---
+- name: run Prometheus
+  hosts: all
+  become: true
+  tasks:
+  - name: Wait connect
+    wait_for_connection:
+  - name: docker
+    docker_container:
+      name: prometheus
+      image: prom/prometheus
+      expose:
+        - 9090
+      ports:
+        - "9090:9090"
+      state: started
+      restart: yes
