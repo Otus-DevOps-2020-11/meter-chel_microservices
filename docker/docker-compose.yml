@@ -10,7 +10,7 @@ services:
         - comment_db
         - post_db
   ui:
-    image: ${USER}/ui:${TAG_UI}
+    image: ${USER_NAME}/ui:${TAG_UI}
     environment:
       - POST_SERVICE_HOST=post
       - POST_SERVICE_PORT=5000
@@ -22,7 +22,7 @@ services:
       - front_net
 
   post:
-    image: ${USER}/post:${TAG_POST}
+    image: ${USER_NAME}/post:${TAG_POST}
     environment:
       - POST_DATABASE_HOST=post_db
       - POST_DATABASE=posts
@@ -31,7 +31,7 @@ services:
       - back_net
 
   comment:
-    image: ${USER}/comment:${TAG_COMMENT}
+    image: ${USER_NAME}/comment:${TAG_COMMENT}
     environment:
       - COMMENT_DATABASE_HOST=comment_db
       - COMMENT_DATABASE=comments
@@ -40,7 +40,7 @@ services:
       - back_net
 
   prometheus:
-    image: ${USER}/prometheus:${TAG_PR}
+    image: ${USER_NAME}/prometheus:${TAG_PR}
     ports:
       - "9090:9090"
     volumes:
