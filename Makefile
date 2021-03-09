@@ -39,7 +39,7 @@ docker-login::
 docker-logout::
 	docker logout
 
-up:: build docker-compose-up-srv docker-compose-up-mon docker-compose-ps
+up:: build docker-compose-up-mon docker-compose-ps
 
 # Create containers
 docker-compose-up-srv::
@@ -48,6 +48,7 @@ docker-compose-up-srv::
 
 docker-compose-up-mon::
 	cd docker && \
+	docker-compose up -d && \
 	docker-compose -f docker-compose-monitoring.yml up -d
 
 # Show containers
@@ -56,8 +57,13 @@ docker-compose-ps::
 	docker-compose ps
 
 # Stop and kill
-clean:: docker-compose-down
+clean:: docker-compose-down-mon
 
-docker-compose-down::
+docker-compose-down-srv::
 	cd docker && \
-	docker-compose down -v
+	docker-compose down -v --remove-orphans
+
+docker-compose-down-mon::
+	cd docker && \
+	docker-compose -f docker-compose-monitoring.yml down -v --remove-orphans && \
+	docker-compose down -v --remove-orphans
