@@ -1,0 +1,47 @@
+---
+- name: Install Docker
+  hosts: all
+  gather_facts: no
+  pre_tasks:
+    - name: Wait server
+      wait_for_connection:
+    - name: Gather facts for first time
+      setup:
+  roles:
+    - docker
+
+- name: run Prometheus
+  hosts: all
+  become: true
+  tasks:
+  - name: Wait connect
+    wait_for_connection:
+  - name: docker
+    docker_container:
+      name: prometheus
+      image: prom/prometheus
+      expose:
+        - '9090'
+      ports:
+        - "9090:9090"
+      volumes:
+        - prometheus_data:/prometheus
+#      command:
+#        - "--config.file=/etc/prometheus/prometheus.yml"
+#        - "--storage.tsdb.path=/prometheus"
+#        - "--storage.tsdb.retention=1d"
+      state: started
+      restart: yes
+
+# - name: Add unit file for Puma
+#   template:
+#     src: puma.service.j2
+#     dest: /etc/systemd/system/puma.service
+#   notify: reload puma
+#
+# - name: Add config for DB connection
+#   template:
+#     src: db_config.j2
+#     dest: "/home/{{ deploy_user }}/db_config"
+#     owner: "{{ deploy_user }}"
+#     group: "{{ deploy_user }}"
