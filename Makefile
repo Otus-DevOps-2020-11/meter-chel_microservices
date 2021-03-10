@@ -5,11 +5,13 @@ DOCKER_TAG=latest
 
 
 # Builds
-build:: build-prometheus build-ui build-comment build-post
+build:: build-prometheus build-alertmanager build-ui build-comment build-post
 
 build-prometheus::
 	cd monitoring/prometheus && \
 	docker build -t $(USER_NAME)/prometheus:$(DOCKER_TAG) .
+	echo
+build-alertmanager::
 	cd monitoring/alertmanager && \
 	docker build -t $(USER_NAME)/alertmanager:$(DOCKER_TAG) .
 build-ui::
@@ -21,16 +23,14 @@ build-comment::
 build-post::
 	cd src/post-py && \
 	USER_NAME=$(USER_NAME) bash docker_build.sh
-#build-alertmanager::
-#	cd monitoring/alertmanager && \
-#	docker build -t $(USER_NAME)/alertmanager:$(DOCKER_TAG) .
+
 
 #Push
-push:: push-prometheus push-ui push-comment push-post docker-logout
+push:: push-prometheus push-alertmanager push-ui push-comment push-post docker-logout
 
 push-prometheus:: build-prometheus docker-login
 	docker push $(USER_NAME)/prometheus:$(DOCKER_TAG)
-build-alertmanager:: build-alertmanager docker-login
+push-alertmanager:: build-alertmanager docker-login
 	docker push $(USER_NAME)/alertmanager:$(DOCKER_TAG)
 push-ui:: build-ui docker-login
 	docker push $(USER_NAME)/ui:$(DOCKER_TAG)
