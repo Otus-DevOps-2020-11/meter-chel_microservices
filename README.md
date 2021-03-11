@@ -472,4 +472,124 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
 ```
+# Домашняя работа к лекции №23 (monitoring-2)
+# Мониторинг приложения и инфраструктуры
+
+Настроен сбор метрик с контейнеров cAdvisor
+Настроена визуализация мерик Grafana
+Созданы Dashboard'ы в Grafana
+Настроен алертинг в Alertmanager
+
+## cAdvisor
+cAdvisor - это инструмент с открытым исходным кодом для мониторинга контейнера.
+Он используется для чтения характеристик производительности и использования ресурсов контейнеров.
+Запуск cAdvisor для мониторинга контейнеров:
+
+'docker/docker-compose-monitoring.yml'
+```
+  cadvisor:
+    image: google/cadvisor:v0.29.0
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+    ports:
+      - "8080:8080"
+```
+
+'monitoring/prometheus/prometheus.yml'
+```
+  - job_name: "cadvisor"
+    static_configs:
+      - targets:
+          - "cadvisor:8080"
+```
+
+## Grafana
+Grafana — это платформа с открытым исходным кодом для визуализации, мониторинга и анализа данных.
+Добавленое Grafana для визуализации метрик:
+
+'docker/docker-compose-monitoring.yml'
+```
+  grafana:
+    image: grafana/grafana:5.0.0
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+volumes:
+  grafana_data:
+```
+
+## Alertmanager
+ Alertmanager - это инструмент для обработки оповещений,
+который устраняет дубликаты, группирует и отправляет оповещения соответствующему
+получателю. Он может обрабатывать оповещения от клиентских приложений, таких как
+Prometheus, и поддерживает множество получателей, включая электронную почту и т.д.
+Добавить Alertmanager для оправки сообшений при проблемах:
+
+'docker/docker-compose-monitoring.yml'
+```
+  alertmanager:
+    image: ${USER_NAME}/alertmanager:${TAG_PR}
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+    ports:
+      - 9093:9093
+    networks:
+      - front_net
+
+```
+
+'monitoring/alertmanager/config.yml'
+```
+global:
+  slack_api_url: 'url_канала'
+route:
+  receiver: 'slack-notifications'
+
+receivers:
+- name: 'slack-notifications'
+  slack_configs:
+  - channel: '#имя_канала'
+```
+### Получение url_канала
+Зайти по ссылке 'https://testing-d984700.slack.com/apps/A0F7XDUAZ-incoming-webhookshttps://app.slack.com/'
+Кнопкой в правом верхнем углу выбрать рабочее пространство
+На странице в списке Choose a channel выбрать канал и нажать кнопку Add incoming WebHooks integration
+в поле Webhook URL будет сгенерированный url_канала
+
+Alert rules
+'monitoring/prometheus/alerts.yml'
+```
+groups:
+  - name: alert.rules
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute"
+          summary: "Instance {{ $labels.instance }} down"
+```
+
+'monitoring/prometheus/prometheus.yml'
+```
+rule_files:
+  - "alerts.yml"
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "alertmanager:9093"
+```
 .

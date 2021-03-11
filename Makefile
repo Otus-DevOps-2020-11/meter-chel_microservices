@@ -5,11 +5,15 @@ DOCKER_TAG=latest
 
 
 # Builds
-build:: build-prometheus build-ui build-comment build-post
+build:: build-prometheus build-alertmanager build-ui build-comment build-post
 
 build-prometheus::
 	cd monitoring/prometheus && \
 	docker build -t $(USER_NAME)/prometheus:$(DOCKER_TAG) .
+	echo
+build-alertmanager::
+	cd monitoring/alertmanager && \
+	docker build -t $(USER_NAME)/alertmanager:$(DOCKER_TAG) .
 build-ui::
 	cd src/ui && \
 	USER_NAME=$(USER_NAME) bash docker_build.sh
@@ -20,11 +24,14 @@ build-post::
 	cd src/post-py && \
 	USER_NAME=$(USER_NAME) bash docker_build.sh
 
+
 #Push
-push:: push-prometheus push-ui push-comment push-post docker-logout
+push:: push-prometheus push-alertmanager push-ui push-comment push-post docker-logout
 
 push-prometheus:: build-prometheus docker-login
 	docker push $(USER_NAME)/prometheus:$(DOCKER_TAG)
+push-alertmanager:: build-alertmanager docker-login
+	docker push $(USER_NAME)/alertmanager:$(DOCKER_TAG)
 push-ui:: build-ui docker-login
 	docker push $(USER_NAME)/ui:$(DOCKER_TAG)
 push-comment:: build-comment docker-login
@@ -42,9 +49,11 @@ docker-logout::
 up:: build docker-compose-up docker-compose-ps
 
 # Create containers
+
 docker-compose-up::
 	cd docker && \
-	docker-compose up -d
+	docker-compose up -d && \
+	docker-compose -f docker-compose-monitoring.yml up -d
 
 # Show containers
 docker-compose-ps::
@@ -56,4 +65,5 @@ clean:: docker-compose-down
 
 docker-compose-down::
 	cd docker && \
-	docker-compose down -v
+	docker-compose -f docker-compose-monitoring.yml down -v --remove-orphans && \
+	docker-compose down -v --remove-orphans
