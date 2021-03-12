@@ -2,6 +2,7 @@
 USER_NAME=ge2rg312qe
 PASS=~/$(USER_NAME).pwd
 DOCKER_TAG=latest
+SRC_TAG=logging
 
 
 # Builds
@@ -33,11 +34,11 @@ push-prometheus:: build-prometheus docker-login
 push-alertmanager:: build-alertmanager docker-login
 	docker push $(USER_NAME)/alertmanager:$(DOCKER_TAG)
 push-ui:: build-ui docker-login
-	docker push $(USER_NAME)/ui:$(DOCKER_TAG)
+	docker push $(USER_NAME)/ui:$(SRC_TAG)
 push-comment:: build-comment docker-login
-	docker push $(USER_NAME)/comment:$(DOCKER_TAG)
+	docker push $(USER_NAME)/comment:$(SRC_TAG)
 push-post:: build-post docker-login
-	docker push $(USER_NAME)/post:$(DOCKER_TAG)
+	docker push $(USER_NAME)/post:$(SRC_TAG)
 
 # Login
 docker-login::
