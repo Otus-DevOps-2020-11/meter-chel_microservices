@@ -21,14 +21,38 @@ services:
     networks:
       - front_net
 
+#  post:
+#    image: ${USER_NAME}/post:${TAG_POST}
+#    environment:
+#      - POST_DATABASE_HOST=post_db
+#      - POST_DATABASE=posts
+#    depends_on:
+#      - post_db
+#    ports:
+#      - "5000:5000"
+#    logging:
+#      driver: "fluentd"
+#      options:
+#        fluentd-address: localhost:24224
+#        tag: service.post
+
   post:
     image: ${USER_NAME}/post:${TAG_POST}
     environment:
       - POST_DATABASE_HOST=post_db
       - POST_DATABASE=posts
+    depends_on:
+      - post_db
+    ports:
+      - "5000:5000"
     networks:
       - front_net
       - back_net
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.post
 
   comment:
     image: ${USER_NAME}/comment:${TAG_COMMENT}
@@ -39,8 +63,10 @@ services:
       - front_net
       - back_net
 
+
 volumes:
   reddit_db:
+
 
 networks:
   front_net:

@@ -1,0 +1,37 @@
+version: "3"
+services:
+  fluentd:
+    image: ${USER_NAME}/fluentd:logging
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - front_net
+
+  elasticsearch:
+    image: elasticsearch:7.4.0
+    environment:
+      - ELASTIC_CLUSTER=false
+      - CLUSTER_NODE_MASTER=true
+      - CLUSTER_MASTER_NODE_NAME=es01
+      - discovery.type=single-node
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+    networks:
+      - front_net
+
+networks:
+  front_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.0/28
+#  back_net:
+#    driver: bridge
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: 10.0.11.0/28
