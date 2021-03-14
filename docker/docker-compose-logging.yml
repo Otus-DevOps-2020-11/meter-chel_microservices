@@ -22,6 +22,14 @@ services:
     networks:
       - front_net
 
+  kibana:
+    image: kibana:7.4.0
+    ports:
+      - "5601:5601"
+    networks:
+      - front_net
+
+
 networks:
   front_net:
     driver: bridge

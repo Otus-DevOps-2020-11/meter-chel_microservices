@@ -20,21 +20,11 @@ services:
       - ${PORT_UI}:9292/tcp
     networks:
       - front_net
-
-#  post:
-#    image: ${USER_NAME}/post:${TAG_POST}
-#    environment:
-#      - POST_DATABASE_HOST=post_db
-#      - POST_DATABASE=posts
-#    depends_on:
-#      - post_db
-#    ports:
-#      - "5000:5000"
-#    logging:
-#      driver: "fluentd"
-#      options:
-#        fluentd-address: localhost:24224
-#        tag: service.post
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.ui
 
   post:
     image: ${USER_NAME}/post:${TAG_POST}
