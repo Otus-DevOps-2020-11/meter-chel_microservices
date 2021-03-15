@@ -485,7 +485,7 @@ cAdvisor - это инструмент с открытым исходным ко
 Он используется для чтения характеристик производительности и использования ресурсов контейнеров.
 Запуск cAdvisor для мониторинга контейнеров:
 
-'docker/docker-compose-monitoring.yml'
+`docker/docker-compose-monitoring.yml`
 ```
   cadvisor:
     image: google/cadvisor:v0.29.0
@@ -498,7 +498,7 @@ cAdvisor - это инструмент с открытым исходным ко
       - "8080:8080"
 ```
 
-'monitoring/prometheus/prometheus.yml'
+`monitoring/prometheus/prometheus.yml`
 ```
   - job_name: "cadvisor"
     static_configs:
@@ -510,7 +510,7 @@ cAdvisor - это инструмент с открытым исходным ко
 Grafana — это платформа с открытым исходным кодом для визуализации, мониторинга и анализа данных.
 Добавленое Grafana для визуализации метрик:
 
-'docker/docker-compose-monitoring.yml'
+`docker/docker-compose-monitoring.yml`
 ```
   grafana:
     image: grafana/grafana:5.0.0
@@ -534,7 +534,7 @@ volumes:
 Prometheus, и поддерживает множество получателей, включая электронную почту и т.д.
 Добавить Alertmanager для оправки сообшений при проблемах:
 
-'docker/docker-compose-monitoring.yml'
+`docker/docker-compose-monitoring.yml`
 ```
   alertmanager:
     image: ${USER_NAME}/alertmanager:${TAG_PR}
@@ -547,7 +547,7 @@ Prometheus, и поддерживает множество получателе�
 
 ```
 
-'monitoring/alertmanager/config.yml'
+`monitoring/alertmanager/config.yml`
 ```
 global:
   slack_api_url: 'url_канала'
@@ -566,7 +566,7 @@ receivers:
 в поле Webhook URL будет сгенерированный url_канала
 
 Alert rules
-'monitoring/prometheus/alerts.yml'
+`monitoring/prometheus/alerts.yml`
 ```
 groups:
   - name: alert.rules
@@ -581,7 +581,7 @@ groups:
           summary: "Instance {{ $labels.instance }} down"
 ```
 
-'monitoring/prometheus/prometheus.yml'
+`monitoring/prometheus/prometheus.yml`
 ```
 rule_files:
   - "alerts.yml"
@@ -592,4 +592,175 @@ alerting:
     - targets:
       - "alertmanager:9093"
 ```
+
+
+# Домашняя работа к лекции №25 (logging-1)
+# Применение системы логирования в инфраструктуре на основе Docker
+
+## Разворачивание стека Elasticsearch Fluentd Kibana (EFK) для сбора логов из контейнеров
+
+`Elasticsearch` — поисковый движок с json rest api, использующий Lucene и написанный на Java.
+На самом деле Elasticsearch не вполне самостоятельный поиск. Это, скорее, красивая обертка над библиотекой Apache Lucene
+Lucene скорее не полноценный сервис, а просто библиотека для построения поисковых систем.
+Все, что она может, — только индексировать и искать, а API для ввода данных, для поисковых запросов,
+кластеризация и прочее — это все отдается на откуп «обертке» - Elasticsearch.
+
+`Fluentd` — коллектор (сборщик), который берет на себя роль приема всех логов, их последующего парсинга и
+бережного укладывания этого всего добра в индексы Elasticsearch.
+
+`Kibana` — визуализатор, т.е. умеет работать с API Elasticsearch, получать и отображать полученные данные.
+
+`Zipkin` — это это распределенная система отслеживания (трассировщик). Он помогает собирать данные синхронизации,
+необходимые для устранения проблем с задержкой в архитектуре микросервиса. Анализируя детали, предоставленные
+пользовательским интерфейсом Zipkin, становится легче находить задержки или какие-либо конкретные
+проблемы служб в архитектуре взаимосвязанных микросервисов.
+
+Пример докер-файла для системы логгирования `docker/docker-compose-logging.yml`
+```
+  fluentd:
+    image: ${USER_NAME}/fluentd:${TAG_LOG}
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - front_net
+
+  elasticsearch:
+    image: elasticsearch:7.4.0
+    environment:
+      - ELASTIC_CLUSTER=false
+      - CLUSTER_NODE_MASTER=true
+      - CLUSTER_MASTER_NODE_NAME=es01
+      - discovery.type=single-node
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+    networks:
+      - front_net
+
+  kibana:
+    image: kibana:7.4.0
+    ports:
+      - "5601:5601"
+    networks:
+      - front_net
+
+  zipkin:
+    image: openzipkin/zipkin:2.21.0
+    ports:
+      - "9411:9411"
+    networks:
+      - front_net
+      - back_net
+
+```
+
+Настройка Fluentd - докер-файл `logging/fluentd/Dokerfile`
+```
+FROM fluent/fluentd:v0.12
+RUN gem install fluent-plugin-elasticsearch --no-rdoc --no-ri --version 1.9.5
+RUN gem install fluent-plugin-grok-parser --no-rdoc --no-ri --version 1.0.0
+ADD fluent.conf /fluentd/etc
+```
+и файл конфигурации - `logging/fluentd/fluent.conf`
+```
+<source>
+  @type forward
+  port 24224
+  bind 0.0.0.0
+</source>
+
+<filter service.post>
+  @type parser
+  format json
+  key_name log
+</filter>
+
+<filter service.ui>
+  @type parser
+  key_name log
+  format grok
+  grok_pattern %{RUBY_LOGGER}
+</filter>
+
+<filter service.ui>
+  @type parser
+  format grok
+  grok_pattern service=%{WORD:service} \| event=%{WORD:event} \| request_id=%{GR
+  key_name message
+  reserve_data true
+</filter>
+
+<match *.**>
+  @type copy
+  <store>
+    @type elasticsearch
+    host elasticsearch
+    port 9200
+    logstash_format true
+    logstash_prefix fluentd
+    logstash_dateformat %Y%m%d
+    include_tag_key true
+    type_name access_log
+    tag_key @log_name
+    flush_interval 1s
+  </store>
+  <store>
+    @type stdout
+  </store>
+</match>
+```
+Драйвер для логгирования необходимо задать каждому сервису отдельно, прмер для сервиса UI
+```
+  ui:
+    image: ${USER_NAME}/ui:${TAG_UI}
+    environment:
+      - POST_SERVICE_HOST=post
+      - POST_SERVICE_PORT=5000
+      - COMMENT_SERVICE_HOST=comment
+      - COMMENT_SERVICE_PORT=9292
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    ports:
+      - ${PORT_UI}:9292/tcp
+    networks:
+      - front_net
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.ui
+```
+### ЗАМЕЧАНИЕ: система логирования должна запускаться до сервисов с которых будут собтраться логи.
+
+Неструктурированные логи отличаются отсутствием четкой структуры
+данных. Также часто бывает, что формат лог-сообщений не подстроен под
+систему централизованного логирования, что существенно увеличивает
+затраты вычислительных и временных ресурсов на обработку данных и
+выделение нужной информации. Для облегчения задачи парсинга можно использовать grok-шаблоны.
+По-сути grok'и - это именованные шаблоны регулярных выражений (очень похоже на функции).
+Можно использовать готовый regexp, просто сославшись на него как на функцию.
+пример в фрагменте файла конфигурации - `logging/fluentd/fluent.conf`
+```
+<filter service.ui>
+@type parser
+key_name log
+format grok
+grok_pattern %{RUBY_LOGGER}
+</filter>
+
+<filter service.ui>
+@type parser
+format grok
+grok_pattern service=%{WORD:service} \| event=%{WORD:event} \| request_id=%{GREEDYDATA:request_id} \| message='%
+{GREEDYDATA:message}'
+key_name message
+reserve_data true
+</filter>
+```
+как видно из фрагмента - используется несколько последовательных шаблонов
+
+## Задание со *
+С помощью Zipkin была найдена причина задержки в работе сервиса POST - в файле `post_app.py` в функции `db_find_single_post`
+строкой `time.sleep(3)` внесена программная задержка.
 .
