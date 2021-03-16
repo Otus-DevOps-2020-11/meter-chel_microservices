@@ -16,31 +16,50 @@ services:
       - POST_SERVICE_PORT=5000
       - COMMENT_SERVICE_HOST=comment
       - COMMENT_SERVICE_PORT=9292
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
     ports:
       - ${PORT_UI}:9292/tcp
     networks:
       - front_net
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.ui
 
   post:
     image: ${USER_NAME}/post:${TAG_POST}
     environment:
       - POST_DATABASE_HOST=post_db
       - POST_DATABASE=posts
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    depends_on:
+      - post_db
+    ports:
+      - "5000:5000"
     networks:
       - front_net
       - back_net
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.post
 
   comment:
     image: ${USER_NAME}/comment:${TAG_COMMENT}
     environment:
       - COMMENT_DATABASE_HOST=comment_db
       - COMMENT_DATABASE=comments
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
     networks:
       - front_net
       - back_net
 
+
 volumes:
   reddit_db:
+
 
 networks:
   front_net:
