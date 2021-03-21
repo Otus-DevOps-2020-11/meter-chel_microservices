@@ -1,0 +1,4 @@
+[node]
+%{ for index, address in extip ~}
+${name[index]} ansible_host=${extip[index]}
+%{ endfor ~}
