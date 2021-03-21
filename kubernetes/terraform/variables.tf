@@ -27,8 +27,18 @@ variable private_key_path {
   description = "Private key path for ssh"
   default = "~/.ssh/id_rsa"
 }
-variable count_app {
-  description = "app counter"
+variable count_host {
+  description = "host counter"
+  type        = number
+  default     = 2
+}
+variable count_master {
+  description = "master counter"
+  type        = number
+  default     = 1
+}
+variable count_worker {
+  description = "worker counter"
   type        = number
   default     = 1
 }

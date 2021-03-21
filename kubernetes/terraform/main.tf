@@ -14,7 +14,9 @@ data "yandex_compute_image" "my_image" {
 resource "yandex_compute_instance" "node" {
    name                      = "node-${count.index}"
    platform_id               = "standard-v2"
-   count                     = var.count_app
+   count                     = var.count_host
+#   master_count = count.count_master
+#   worker_count = var.count_worker
 
   resources {
     cores  = 4
@@ -54,6 +56,8 @@ resource "local_file" "generate_inventory" {
   content = templatefile("inventory.tmpl", {
     name = yandex_compute_instance.node.*.name,
     extip = yandex_compute_instance.node.*.network_interface.0.nat_ip_address,
+    master_count = var.count_master,
+    worker_count = var.count_worker
     }
   )
   filename = "../ansible/inventory.ini"
@@ -63,7 +67,7 @@ resource "local_file" "generate_inventory" {
    }
 
    provisioner "local-exec" {
-     command = "ansible-playbook install_docker.yml"
+     command = "ansible-playbook node-all.yml"
 #     command = "ansible-playbook run_node.yml"
      working_dir = "../ansible"
    }
