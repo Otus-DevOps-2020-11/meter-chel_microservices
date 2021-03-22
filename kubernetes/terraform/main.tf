@@ -6,6 +6,7 @@ provider "yandex" {
 #  version = "~> 0.35.0"
 }
 
+
 data "yandex_compute_image" "my_image" {
   family = "ubuntu-1804-lts"
 }
@@ -15,12 +16,12 @@ resource "yandex_vpc_network" "kubernetes-network" {
    name = "kubernetes-network"
 }
 
- resource "yandex_vpc_subnet" "kubernetes-subnet" {
+resource "yandex_vpc_subnet" "kubernetes-subnet" {
    name           = "kubernetes-subnet"
    zone           = "ru-central1-a"
    network_id     = yandex_vpc_network.kubernetes-network.id
    v4_cidr_blocks = ["10.244.0.0/16"]
- }
+}
 
 
 resource "yandex_compute_instance" "node" {
@@ -61,7 +62,6 @@ resource "yandex_compute_instance" "node" {
     private_key = file(var.private_key_path)
   }
 }
-
 
 
 resource "local_file" "generate_inventory" {

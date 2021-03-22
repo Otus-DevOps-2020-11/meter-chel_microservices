@@ -38,6 +38,7 @@
      apt:
        name: kubeadm=1.19.0-00
        state: present
+       update_cache: true
 
    - name: Disable SWAP since kubernetes can`t work with swap enabled (1/2)
      shell: |
@@ -58,3 +59,4 @@
        name: kubectl=1.19.0-00
        state: present
        force: yes
+       update_cache: true
