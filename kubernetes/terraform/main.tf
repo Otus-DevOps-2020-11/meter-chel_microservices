@@ -87,4 +87,10 @@ resource "local_file" "generate_inventory" {
      command = "ansible-playbook master.yml"
      working_dir = "../ansible"
    }
+
+   provisioner "local-exec" {
+     command = "ansible-playbook worker.yml"
+     working_dir = "../ansible"
+   }
+
 }

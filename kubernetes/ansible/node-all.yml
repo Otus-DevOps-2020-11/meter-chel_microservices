@@ -39,15 +39,6 @@
        name: kubeadm=1.19.0-00
        state: present
 
-- hosts: master
-  become: yes
-  tasks:
-   - name: install kubectl
-     apt:
-       name: kubectl=1.19.0-00
-       state: present
-       force: yes
-
    - name: Disable SWAP since kubernetes can`t work with swap enabled (1/2)
      shell: |
        swapoff -a
@@ -57,3 +48,13 @@
        path: /etc/fstab
        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
        replace: '# \1'
+
+
+- hosts: master
+  become: yes
+  tasks:
+   - name: install kubectl
+     apt:
+       name: kubectl=1.19.0-00
+       state: present
+       force: yes
