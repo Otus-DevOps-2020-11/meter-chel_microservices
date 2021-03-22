@@ -11,16 +11,26 @@ data "yandex_compute_image" "my_image" {
 }
 
 
+resource "yandex_vpc_network" "kubernetes-network" {
+   name = "kubernetes-network"
+}
+
+ resource "yandex_vpc_subnet" "kubernetes-subnet" {
+   name           = "kubernetes-subnet"
+   zone           = "ru-central1-a"
+   network_id     = yandex_vpc_network.kubernetes-network.id
+   v4_cidr_blocks = ["10.244.0.0/16"]
+ }
+
+
 resource "yandex_compute_instance" "node" {
    name                      = "node-${count.index}"
    platform_id               = "standard-v2"
    count                     = var.count_host
-#   master_count = count.count_master
-#   worker_count = var.count_worker
 
   resources {
     cores  = 4
-    memory = 4
+    memory = 8
     core_fraction = 100
   }
 
@@ -33,7 +43,8 @@ resource "yandex_compute_instance" "node" {
 
   }
   network_interface {
-    subnet_id = var.subnet_id
+    subnet_id = yandex_vpc_subnet.kubernetes-subnet.id
+#    subnet_id = var.subnet_id
     nat       = true
   }
 
@@ -52,6 +63,7 @@ resource "yandex_compute_instance" "node" {
 }
 
 
+
 resource "local_file" "generate_inventory" {
   content = templatefile("inventory.tmpl", {
     name = yandex_compute_instance.node.*.name,
@@ -68,7 +80,6 @@ resource "local_file" "generate_inventory" {
 
    provisioner "local-exec" {
      command = "ansible-playbook node-all.yml"
-#     command = "ansible-playbook run_node.yml"
      working_dir = "../ansible"
    }
 

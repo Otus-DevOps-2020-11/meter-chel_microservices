@@ -1,4 +1,19 @@
-[node]
+[all]
 %{ for index, address in extip ~}
 ${name[index]} ansible_host=${extip[index]}
 %{ endfor ~}
+
+[master]
+%{ for i in range(length(name) - (master_count)-1) ~}
+${name[i]} ansible_host=${extip[i]}
+%{ endfor ~}
+
+[workers]
+%{ for i in range(length(name)) ~}
+%{ if i >= (master_count) ~}
+${name[i]} ansible_host=${extip[i]}
+%{ endif ~}
+%{ endfor ~}
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

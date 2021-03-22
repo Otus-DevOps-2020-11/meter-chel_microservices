@@ -38,3 +38,15 @@
      apt:
        name: kubeadm=1.19.0-00
        state: present
+       update_cache: true
+
+
+- hosts: master
+  become: yes
+  tasks:
+   - name: install kubectl
+     apt:
+       name: kubectl=1.19.0-00
+       state: present
+       force: yes
+       update_cache: true
