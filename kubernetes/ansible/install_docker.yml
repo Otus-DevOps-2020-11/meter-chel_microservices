@@ -1,0 +1,11 @@
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: Wait server
+      wait_for_connection:
+  tasks:
+    - name: install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
