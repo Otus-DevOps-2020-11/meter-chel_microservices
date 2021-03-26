@@ -865,4 +865,23 @@ fhm5929kckjkbend1eg1   Ready    <none>   70s   v1.19.0
 fhmf8dq4er9fsv518kav   Ready    <none>   70s   v1.19.0
 fhmmp8bvdfm10e3pstup   Ready    master   92s   v1.19.0
 ```
+
+
+# Домашняя работа к лекции №28 (kubernetes-2)
+# Основные модели безопасности и контроллеры в Kubernetes.
+
+Установлен Kubectl
+Установлен Minikube
+
+./install_minikube.sh.
+
+Немного команд:
+kubectl get nodes<-----><------><------><------># Посмотреть список узлов кластера.
+kubectl config get-contexts            ><------># показать список контекстов
+kubectl get deployment                 ><------># Вывести развёртывание
+kubectl get pods --selector <--><------><------># Получить метку версии всех подов с меткой
+kubectl port-forward <my-pod> 8080:9292><------># Переадресовать порт 8080 в локальной машине на порт 9292 в поде my-pod
+kubectl apply -f ./reddit/<----><------><------># создать ресурсы из всех файлов манифеста в директории
+kubectl apply -n dev -f ./reddit/ <----><------>#Запустить приложение в dev неймспейсе
+
 .
