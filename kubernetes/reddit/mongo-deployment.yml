@@ -1,3 +1,5 @@
+# name: mongo-gce-pd-storage
+# no remove - for check travece
 ---
 apiVersion: apps/v1
 kind: Deployment
