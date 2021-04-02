@@ -4,5 +4,5 @@ service:
   externalPort: 9292
 
 image:
-  repository: ge2rg312qe/ui # Не забудьте подставить свой образ
+  repository: ge2rg312qe/ui
   tag: latest

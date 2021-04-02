@@ -30,14 +30,15 @@
 # Page-17
 ---
 apiVersion: apps/v1
+#apiVersion: networking.k8s.io/v1
 kind: Deployment
-metadata:
+metadata: # Блок метаданных деплоя
   name: {{ .Release.Name }}-{{ .Chart.Name }}
   labels:
     app: reddit
     component: ui
     release: {{ .Release.Name }}
-spec:
+spec: # Блок спецификации деплоя
   replicas: 3
   strategy:
     type: Recreate
@@ -46,7 +47,7 @@ spec:
       app: reddit
       component: ui
       release: {{ .Release.Name }}
-  template:
+  template: # Блок описания POD-ов
     metadata:
       name: ui
       labels:
@@ -55,10 +56,12 @@ spec:
         release: {{ .Release.Name }}
     spec:
       containers:
-      - image: ge2rg312qe/ui # Не забудьте подставить свой образ
+#      - image: ge2rg312qe/ui # Не забудьте подставить свой образ
+      - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         name: ui
         ports:
-        - containerPort: 9292
+#        - containerPort: 9292
+        - containerPort: {{ .Values.service.internalPort }}
           name: ui
           protocol: TCP
         env:

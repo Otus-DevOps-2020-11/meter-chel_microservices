@@ -44,4 +44,5 @@ spec:
           service:
             name: {{ .Release.Name }}-{{ .Chart.Name }}
             port:
-              number: 9292
+#              number: 9292
+              number: {{ .Values.service.externalPort }}
