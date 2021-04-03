@@ -6,3 +6,11 @@ service:
 image:
   repository: ge2rg312qe/ui
   tag: latest
+
+ingress:
+  class: nginx
+
+postHost:
+postPort:
+commentHost:
+commentPort:
