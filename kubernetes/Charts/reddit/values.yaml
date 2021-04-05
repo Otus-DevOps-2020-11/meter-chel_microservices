@@ -1,0 +1,25 @@
+comment:
+  image:
+    repository: ge2rg312qe/comment
+    tag: latest
+  service:
+    externalPort: 9292
+
+post:
+  image:
+    repository: ge2rg312qe/post
+    tag: latest
+  service:
+    externalPort: 5000
+
+ui:
+  image:
+    repository: ge2rg312qe/ui
+    tag: latest
+  service:
+    externalPort: 9292
+
+mongodb:
+    usePassword: false
+    image:
+      tag: 3.6.23-debian-9-r11
