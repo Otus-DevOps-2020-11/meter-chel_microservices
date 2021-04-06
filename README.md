@@ -890,4 +890,20 @@ kubectl apply -n dev -f ./reddit/ <----><------>#Запустить прилож
 
 Настроен балансировщик
 Примонтировано внешнее хранилище
+
+
+# Домашняя работа к лекции №30 (kubernetes-4)
+# Интеграция Kubernettes в GitLabCI
+
+Helm
+GitLab в Kubernetes
+CI/CD в Kubernetes
+
+
+# Домашняя работа к лекции №31 (kubernetes-5)
+# Kubernetes. Мониторинг и логгирование
+
+Развернут Prometheus в Kubernetes
+Настройка Prometheus и Grafana (сборка метрик)
+
 .
